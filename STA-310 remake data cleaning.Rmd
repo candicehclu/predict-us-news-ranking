@@ -1,0 +1,43 @@
+---
+title: "STA-310 remake data cleaning"
+output: pdf_document
+date: "2025-03-20"
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(tidyverse)
+```
+
+```{r}
+# read dataframe
+top100data <- read.csv("/Users/candicehclu/Desktop/top100data.csv")
+```
+
+```{r}
+# calculate proportion of NAs
+missing_proportions <- colMeans(is.na(long_table))
+
+# filters out variables with more than 50% missing
+threshold <- 0
+data_top100 <- long_table[, missing_proportions <= threshold]
+
+# 0.2 gives 835 variables
+# 0.1 gives 618
+# 0 gives 548
+```
+
+```{r}
+# filter out those with all unique values or all same values, besides the id column (UNITID)
+id_column <- "UNITID" 
+
+unique_columns <- sapply(data_top100, function(x) length(unique(x)) == nrow(data_top100))
+
+data_top100_filtered <- data_top100[, !(unique_columns & names(data_top100) != id_column)]
+# this didn't remove anything
+
+all_same_columns <- sapply(data_top100, function(x) length(unique(x)) == 1)
+
+data_top100_filtered <- data_top100[, !(all_same_columns)]
+# if filter all NAs this gives 391 variables
+```
