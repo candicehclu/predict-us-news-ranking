@@ -15,24 +15,31 @@ ranking <- read.csv("rankings.csv")
 ```
 
 ```{r}
+# get top 100 ranked schools from the 2025 ranking data that we're predicting for
 ranking100 <- ranking %>%
   filter(as.numeric(X2025) <= 100)
-
+```
+```{r}
+# remove columns that have all same data
 all_same_columns <- sapply(top100data, function(x) length(unique(x)) == 1)
+data_top100 <- top100data[, !(all_same_columns)] # this gives 2987 variables
 
-data_top100 <- top100data[, !(all_same_columns)]
-# this gives 2987
+# make PS NA before filtering
+data_top100[] <- as.data.frame(sapply(data_top100, function(col) ifelse(col == "PS", NA, col)))
 
-# calculate proportion of NAs
+# print check that PS is not there
+# print(data_top100$ENRL_4YR_TRANS_YR2_RT)
+
+# TODO: for each school, replace missing numeric data with the average value 
+```
+
+```{r}
+# calculate proportion of NA
 missing_proportions <- colMeans(is.na(data_top100))
 
-# filters out variables with more than 50% missing
+# filters out variables with given threshold
 threshold <- 0.1
 data_top100_filtered <- data_top100[, missing_proportions <= threshold]
-
-# 0.2 gives 679
-# 0.1 gives 462
-# 0 gives 392
 ```
 
 ```{r}
@@ -40,12 +47,14 @@ data_top100_filtered <- data_top100[, missing_proportions <= threshold]
 library(glmnet)
 library(tidyverse)
 
+# remove 2025 data from training data
 training <- data_top100_filtered %>%
   filter(Year != 2025)
 
 ranking_training <- ranking100 %>%
   select(c("IPEDS.ID", "X2024", "X2023", "X2022", "X2021"))
 
+# pivot ranking
 ranking_long <- ranking_training %>% 
   pivot_longer(cols = c(X2024, X2023, X2022, X2021), 
                names_to = "Year",
