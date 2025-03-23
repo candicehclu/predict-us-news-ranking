@@ -3,7 +3,6 @@ title: "STA-310 remake data cleaning"
 output: pdf_document
 date: "2025-03-20"
 ---
-
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
@@ -11,21 +10,86 @@ library(tidyverse)
 
 ```{r}
 # read dataframe
-top100data <- read.csv("/Users/candicehclu/Desktop/top100data.csv")
+top100data <- read.csv("top100data.csv")
+ranking <- read.csv("rankings.csv")
 ```
 
 ```{r}
+ranking100 <- ranking %>%
+  filter(as.numeric(X2025) <= 100)
+
+all_same_columns <- sapply(top100data, function(x) length(unique(x)) == 1)
+
+data_top100 <- top100data[, !(all_same_columns)]
+# this gives 2987
+
 # calculate proportion of NAs
-missing_proportions <- colMeans(is.na(long_table))
+missing_proportions <- colMeans(is.na(data_top100))
 
 # filters out variables with more than 50% missing
-threshold <- 0
-data_top100 <- long_table[, missing_proportions <= threshold]
+threshold <- 0.1
+data_top100_filtered <- data_top100[, missing_proportions <= threshold]
 
-# 0.2 gives 835 variables
-# 0.1 gives 618
-# 0 gives 548
+# 0.2 gives 679
+# 0.1 gives 462
+# 0 gives 392
 ```
+
+```{r}
+# install.packages("glmnet")
+library(glmnet)
+library(tidyverse)
+
+training <- data_top100_filtered %>%
+  filter(Year != 2025)
+
+ranking_training <- ranking100 %>%
+  select(c("IPEDS.ID", "X2024", "X2023", "X2022", "X2021"))
+
+ranking_long <- ranking_training %>% 
+  pivot_longer(cols = c(X2024, X2023, X2022, X2021), 
+               names_to = "Year",
+               values_to = "Ranking"
+              )
+
+# minus 1 from year
+ranking_join <- ranking_long %>%
+  mutate(Year = as.numeric(substring(Year, 2)))
+
+training_final <- left_join(training, ranking_join, by = c("UNITID" = "IPEDS.ID", "Year" = "Year")) %>% na.omit(Ranking)
+
+training_final$Ranking <- as.numeric(training_final$Ranking)
+
+training_final <- training_final %>% 
+  na.omit(Ranking)
+
+sum(is.na(training_final$Ranking))
+
+training <- subset(training_final, select = -c(Ranking, UNITID, Year, OPEID, OPEID6, INSTNM))
+
+training_matrix <- data.matrix(training)
+
+# Check for missing values
+if (any(is.na(training_final$Ranking))) {
+  stop("Missing values found in y. Please handle them.")
+}
+
+# Check for constant values within a fold
+if (length(unique(training_final$Ranking)) == 1) {
+  stop("y is constant within this fold. Please ensure sufficient variation.")
+}
+
+cv.lasso <- cv.glmnet(training_matrix, training_final$Ranking, alpha=1)  # alpha=1 for Lasso
+plot(cv.lasso)
+
+best.lambda <- cv.lasso$lambda.min
+
+lasso.model <- glmnet(training_matrix, training_final$Ranking, alpha=1, lambda=best.lambda)
+lasso_select <- coef(lasso.model)
+
+# 101 variables chosen
+```
+
 
 ```{r}
 # filter out those with all unique values or all same values, besides the id column (UNITID)
@@ -35,9 +99,6 @@ unique_columns <- sapply(data_top100, function(x) length(unique(x)) == nrow(data
 
 data_top100_filtered <- data_top100[, !(unique_columns & names(data_top100) != id_column)]
 # this didn't remove anything
-
-all_same_columns <- sapply(data_top100, function(x) length(unique(x)) == 1)
-
-data_top100_filtered <- data_top100[, !(all_same_columns)]
-# if filter all NAs this gives 391 variables
 ```
+
+
