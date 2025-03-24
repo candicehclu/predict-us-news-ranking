@@ -19,6 +19,7 @@ ranking <- read.csv("rankings.csv")
 ranking100 <- ranking %>%
   filter(as.numeric(X2025) <= 100)
 ```
+
 ```{r}
 # remove columns that have all same data
 all_same_columns <- sapply(top100data, function(x) length(unique(x)) == 1)
@@ -30,7 +31,43 @@ data_top100[] <- as.data.frame(sapply(data_top100, function(col) ifelse(col == "
 # print check that PS is not there
 # print(data_top100$ENRL_4YR_TRANS_YR2_RT)
 
+# remove if all NA
+
+data_top100 <- data_top100[,colSums(is.na(data_top100))<nrow(data_top100)]
+
 # TODO: for each school, replace missing numeric data with the average value 
+
+# make variables numeric
+
+data_top100 <- data_top100 %>%
+  mutate(across(12:ncol(.), as.numeric))
+
+# calculate whole mean
+
+overall_means <- data_top100 %>%
+  summarise(across(where(is.numeric), mean, na.rm = TRUE)) %>% 
+  as.list()
+
+# add missing values
+
+clean_data_top100 <- data_top100 %>%
+  group_by(UNITID) %>%
+  mutate(across(where(is.numeric), ~ {
+    # if all is na replace with overall means
+    if (all(is.na(.))) {
+      
+      overall_means[[cur_column()]]
+    } else {
+      # otherwise replace na with group mean
+      ifelse(is.na(.), mean(., na.rm = TRUE), .)
+    }
+  })) %>%
+  ungroup()
+
+# check NA
+
+colSums(is.na(clean_data_top100))
+
 ```
 
 ```{r}
@@ -61,10 +98,11 @@ ranking_long <- ranking_training %>%
                values_to = "Ranking"
               )
 
-# minus 1 from year
+# fix year variable to represent number
 ranking_join <- ranking_long %>%
   mutate(Year = as.numeric(substring(Year, 2)))
 
+# merge data and ranking
 training_final <- left_join(training, ranking_join, by = c("UNITID" = "IPEDS.ID", "Year" = "Year")) %>% na.omit(Ranking)
 
 training_final$Ranking <- as.numeric(training_final$Ranking)
