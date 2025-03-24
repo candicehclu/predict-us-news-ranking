@@ -251,7 +251,11 @@ print(selected_vars)
 
 ```{r}
 # backwards selection
+# models <- regsubsets(Ranking~., data = training, nvmax = 30, method = "")
 
+# method takes the values “backward”, “forward” and “seqrep” (seqrep = sequential replacement, combination of forward and backward selections)
+
+# summary(models)
 ```
 
 
