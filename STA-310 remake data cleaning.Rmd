@@ -6,6 +6,12 @@ date: "2025-03-20"
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 library(tidyverse)
+# install.packages("glmnet")
+# install.packages("caret")
+# install.packages("leaps")
+library(glmnet)
+library(caret)
+library(leaps)
 ```
 
 ```{r}
@@ -27,6 +33,13 @@ data_top100 <- top100data[, !(all_same_columns)] # this gives 2987 variables
 
 # make PS NA before filtering
 data_top100[] <- as.data.frame(sapply(data_top100, function(col) ifelse(col == "PS", NA, col)))
+
+# filter out those with all unique values or all same values, besides the id column (UNITID)
+id_column <- "UNITID" 
+
+unique_columns <- sapply(data_top100, function(x) length(unique(x)) == nrow(data_top100))
+
+data_top100_filtered <- data_top100[, !(unique_columns & names(data_top100) != id_column)]
 
 # print check that PS is not there
 # print(data_top100$ENRL_4YR_TRANS_YR2_RT)
@@ -176,10 +189,6 @@ data_top100_filtered[vars_to_factor] <- lapply(data_top100_filtered[vars_to_fact
 
 
 ```{r}
-# install.packages("glmnet")
-library(glmnet)
-library(tidyverse)
-
 # remove 2025 data from training data
 training <- data_top100_filtered %>%
   filter(Year != 2025)
@@ -197,7 +206,7 @@ ranking_long <- ranking_training %>%
 # fix year variable to represent number
 ranking_join <- ranking_long %>%
   mutate(Year = as.numeric(substring(Year, 2)),
-         IPEDS.ID = as.character(IPEDS.ID))
+         IPEDS.ID = as.numeric(IPEDS.ID))
 
 # merge data and ranking
 training <- training %>%
@@ -210,24 +219,17 @@ training_final$Ranking <- as.numeric(training_final$Ranking)
 training_final <- training_final %>% 
   na.omit(Ranking)
 
-sum(is.na(training_final$Ranking))
+# check how many is NA
+# sum(is.na(training_final$Ranking))
 
 # religious affiliation because most are NA and not quantitative
 
 training <- subset(training_final, select = -c(Ranking, UNITID, Year, OPEID, OPEID6, INSTNM, CITY, STABBR, ZIP, LONGITUDE, LATITUDE, RELAFFIL, X))
 
 training_matrix <- data.matrix(training)
-
-# Check for missing values
-if (any(is.na(training_final$Ranking))) {
-  stop("Missing values found in y. Please handle them.")
-}
-
-# Check for constant values within a fold
-if (length(unique(training_final$Ranking)) == 1) {
-  stop("y is constant within this fold. Please ensure sufficient variation.")
-}
-
+```
+```{r}
+# Run lasso
 cv.lasso <- cv.glmnet(training_matrix, training_final$Ranking, alpha=1)  # alpha=1 for Lasso
 plot(cv.lasso)
 
@@ -236,27 +238,20 @@ best.lambda <- cv.lasso$lambda.min
 lasso.model <- glmnet(training_matrix, training_final$Ranking, alpha=1, lambda=best.lambda)
 lasso_select <- coef(lasso.model)
 
-print(lasso_select)
+# print(lasso_select)
 
-# 101 variables chosen
 selected_vars <- rownames(lasso_select)[which(lasso_select != 0)][-1]
 
 # print selected variables
 print(selected_vars)
-
 
 # 110 variables chosen
 ```
 
 
 ```{r}
-# filter out those with all unique values or all same values, besides the id column (UNITID)
-id_column <- "UNITID" 
+# backwards selection
 
-unique_columns <- sapply(data_top100, function(x) length(unique(x)) == nrow(data_top100))
-
-data_top100_filtered <- data_top100[, !(unique_columns & names(data_top100) != id_column)]
-# this didn't remove anything
 ```
 
 
