@@ -173,90 +173,6 @@ vars_to_factor <- c(
 # Convert all specified variables to factors
 data_top100_filtered[vars_to_factor] <- lapply(data_top100_filtered[vars_to_factor], factor)
 
-
-CCBASIC
-REGION
-LOCALE
-CCUGPROF
-CCSIZET
-CIP01BACHL                     
-CIP03CERT2                                             
-CIP04BACHL                                             
-CIP05CERT2                                             
-CIP09CERT2                                             
-CIP10BACHL                                             
-CIP11CERT2                                             
-CIP11BACHL                                             
-CIP13CERT1                                             
-CIP13BACHL                                             
-CIP14CERT4                                             
-CIP15BACHL                                             
-CIP16CERT2                                             
-CIP19BACHL                                             
-CIP22CERT2                                             
-CIP23CERT2                                             
-CIP24ASSOC                                             
-CIP26CERT1                                             
-CIP26BACHL                                             
-CIP27BACHL                                             
-CIP30CERT1                                             
-CIP30BACHL                                             
-CIP38CERT2                                             
-CIP39BACHL                                             
-CIP40ASSOC                                             
-CIP41BACHL                                             
-CIP42ASSOC                                             
-CIP43BACHL                                             
-CIP45CERT1                                             
-CIP45BACHL                                             
-CIP50ASSOC                                             
-CIP50BACHL                                             
-CIP51BACHL                                             
-CIP52CERT2                                             
-CIP52CERT4                                             
-CIP54CERT2
-CIP03BACHL
-CIP05CERT1
-CIP05BACHL
-CIP09BACHL
-CIP11CERT1
-CIP11ASSOC
-CIP12CERT1
-CIP13CERT2
-CIP14CERT1
-CIP14BACHL
-CIP16CERT1
-CIP16BACHL
-CIP22CERT1
-CIP22BACHL
-CIP23BACHL
-CIP24BACHL
-CIP26CERT2
-CIP27CERT2
-CIP29BACHL
-CIP30CERT2
-CIP31BACHL
-CIP38BACHL
-CIP40CERT2
-CIP40BACHL
-CIP42CERT2
-CIP42BACHL
-CIP44BACHL
-CIP45CERT2
-CIP50CERT2
-CIP50CERT4
-CIP51CERT1
-CIP52CERT1
-CIP52ASSOC
-CIP52BACHL
-CIP54BACHL
-SCHTYPE
-OPEFLAG
-AMDCON7
-
-
-
-
 ```
 
 
@@ -294,7 +210,7 @@ training_final <- training_final %>%
 
 sum(is.na(training_final$Ranking))
 
-# religious affliation because most are NA and not quantitative
+# religious affiliation because most are NA and not quantitative
 
 training <- subset(training_final, select = -c(Ranking, UNITID, Year, OPEID, OPEID6, INSTNM, CITY, STABBR, ZIP, LONGITUDE, LATITUDE, RELAFFIL, X))
 
