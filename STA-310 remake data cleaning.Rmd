@@ -193,6 +193,9 @@ data_top100_filtered[vars_to_factor] <- lapply(data_top100_filtered[vars_to_fact
 training <- data_top100_filtered %>%
   filter(Year != 2025)
 
+testing <- data_top100_filtered %>%
+  filter(Year == 2025)
+
 ranking_training <- ranking100 %>%
   select(c("IPEDS.ID", "X2024", "X2023", "X2022", "X2021"))
 
@@ -228,6 +231,23 @@ training <- subset(training_final, select = -c(Ranking, UNITID, Year, OPEID, OPE
 
 training_matrix <- data.matrix(training)
 ```
+
+```{r}
+# making testing dataset
+
+ranking_testing <- ranking100 %>%
+  select(c("IPEDS.ID", "X2025")) %>%
+  mutate(X2025 = as.numeric(X2025), IPEDS.ID = as.numeric(IPEDS.ID))
+
+testing <- testing %>%
+  mutate(UNITID = as.numeric(UNITID))
+
+testing_final <- left_join(testing, ranking_testing, by = c("UNITID" = "IPEDS.ID"))
+
+# pivot ranking
+
+```
+
 ```{r}
 # Run lasso
 cv.lasso <- cv.glmnet(training_matrix, training_final$Ranking, alpha=1)  # alpha=1 for Lasso
@@ -252,13 +272,73 @@ print(selected_vars)
 ```{r}
 # further variable selection
 
-# filter 
+lasso_filtered <- training_final %>%
+  select(c(all_of(selected_vars), Ranking))
 
-# models <- regsubsets(Ranking~., data = training, nvmax = 30, method = "seqrep")
+# backwards selection
+back_models <- regsubsets(Ranking~., data = lasso_filtered, nvmax = 30, method = "backward")
+summary_back <- summary(back_models)
 
-# method takes the values “backward”, “forward” and “seqrep” (seqrep = sequential replacement, combination of forward and backward selections)
-
-# summary(models)
+# save optimal model based on bic
+best_model_back <- summary_back$which[which.min(summary_back$bic),]
+models_backward <- summary$which
 ```
 
 
+
+
+```{r}
+# forward selection
+forw_models <- regsubsets(Ranking~., data = lasso_filtered, nvmax = 30, method = "forward")
+summary_forw <- summary(forw_models)
+
+# save optimal model based on bic
+best_model_forw <- summary_forw$which[which.min(summary_forw$bic),]
+models_forward <- summary_forw$which
+```
+
+```{r}
+# stepwise selection
+
+step_models <- regsubsets(Ranking~., data = lasso_filtered, nvmax = 30, method = "seqrep")
+summary_step <- summary(step_models)
+
+# save optimal model based on bic
+best_model_step <- summary_step$which[which.min(summary_step$bic),]
+
+# they dropped the factor variable itself, but added the factored variable name with the value string attached back to the formula, which the function doesn't recognize
+
+# check which variables are newly created and add back
+missing_vars <- setdiff(selected_vars, colnames(lasso_filtered))
+print(missing_vars)
+
+# remove them (and intercept) and add original variable back
+selected_vars <- names(which(best_model_step))[-c(1, 2, 3, 4, 5, 6)]
+selected_vars <- c(selected_vars, "LOCALE", "CIP15BACHL", "CIP39BACHL", "CIP50BACHL")
+which(selected_vars == "CIP15BACHL1") 
+which(selected_vars == "CIP39BACHL1")
+which(selected_vars == "CIP50BACHL1")
+
+# refit model with selected variables
+formula <- as.formula(paste("Ranking ~", paste(selected_vars, collapse = " + ")))
+final_model_step <- lm(formula, data = lasso_filtered)
+
+# check model performance
+summary(final_model_step)
+
+# predict, round, and print
+predictions_step <- predict(final_model_step, newdata = testing[, selected_vars])
+predictions_step_rounded <- sapply(predictions_step, function(x) round(x))
+print(predictions_step_rounded)
+
+# calculate accuracy
+residual <- {}
+for (i in 1:50) {
+  residual[i] <-  abs(predictions_step_rounded[i] - testing_final$X2025[i])
+}
+sum(residual) / 100
+```
+
+```{r}
+
+```
