@@ -66,17 +66,18 @@ clean_data_top100 <- data_top100 %>%
 
 # check NA
 
-colSums(is.na(clean_data_top100))
+# colSums(is.na(clean_data_top100))
 
 ```
 
 ```{r}
 # calculate proportion of NA
-missing_proportions <- colMeans(is.na(data_top100))
+missing_proportions <- colMeans(is.na(clean_data_top100))
 
+missing_proportions[missing_proportions != 0]
 # filters out variables with given threshold
-threshold <- 0.1
-data_top100_filtered <- data_top100[, missing_proportions <= threshold]
+threshold <- 0
+data_top100_filtered <- clean_data_top100[, missing_proportions <= threshold]
 ```
 
 ```{r}
