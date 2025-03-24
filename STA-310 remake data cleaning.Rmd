@@ -243,9 +243,6 @@ testing <- testing %>%
   mutate(UNITID = as.numeric(UNITID))
 
 testing_final <- left_join(testing, ranking_testing, by = c("UNITID" = "IPEDS.ID"))
-
-# pivot ranking
-
 ```
 
 ```{r}
