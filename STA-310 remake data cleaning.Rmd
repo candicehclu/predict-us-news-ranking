@@ -278,7 +278,9 @@ summary_back <- summary(back_models)
 
 # save optimal model based on bic
 best_model_back <- summary_back$which[which.min(summary_back$bic),]
-models_backward <- summary$which
+models_backward <- summary_back$which
+
+
 ```
 
 
@@ -310,21 +312,21 @@ missing_vars <- setdiff(selected_vars, colnames(lasso_filtered))
 print(missing_vars)
 
 # remove them (and intercept) and add original variable back
-selected_vars <- names(which(best_model_step))[-c(1, 2, 3, 4, 5, 6)]
-selected_vars <- c(selected_vars, "LOCALE", "CIP15BACHL", "CIP39BACHL", "CIP50BACHL")
-which(selected_vars == "CIP15BACHL1") 
-which(selected_vars == "CIP39BACHL1")
-which(selected_vars == "CIP50BACHL1")
+step_selected_vars <- names(which(best_model_step))[-c(1, 2, 3, 4, 5, 6)]
+step_selected_vars <- c(step_selected_vars, "LOCALE", "CIP15BACHL", "CIP39BACHL", "CIP50BACHL")
+which(step_selected_vars == "CIP15BACHL1") 
+which(step_selected_vars == "CIP39BACHL1")
+which(step_selected_vars == "CIP50BACHL1")
 
 # refit model with selected variables
-formula <- as.formula(paste("Ranking ~", paste(selected_vars, collapse = " + ")))
+formula <- as.formula(paste("Ranking ~", paste(step_selected_vars, collapse = " + ")))
 final_model_step <- lm(formula, data = lasso_filtered)
 
 # check model performance
 summary(final_model_step)
 
 # predict, round, and print
-predictions_step <- predict(final_model_step, newdata = testing[, selected_vars])
+predictions_step <- predict(final_model_step, newdata = testing[, step_selected_vars])
 predictions_step_rounded <- sapply(predictions_step, function(x) round(x))
 print(predictions_step_rounded)
 
@@ -337,5 +339,52 @@ sum(residual) / 100
 ```
 
 ```{r}
+# compare variables from 3 subset selection
+vars_each_model <- list(
+  backward = names(which(best_model_back)),
+  forward = names(which(best_model_forw)),
+  stepwise = names(which(best_model_step))
+)
+
+vars_each_model
+
+# common
+common_vars <- Reduce(intersect, vars_each_model)
+
+# unique
+unique_to_backward <- setdiff(vars_each_model$backward, union(vars_each_model$forward, vars_each_model$stepwise))
+unique_to_forward <- setdiff(vars_each_model$forward, union(vars_each_model$backward, vars_each_model$stepwise))
+unique_to_stepwise <- setdiff(vars_each_model$stepwise, union(vars_each_model$backward, vars_each_model$forward))
+
+list(
+  common = common_vars,
+  unique_backward = unique_to_backward,
+  unique_forward = unique_to_forward,
+  unique_stepwise = unique_to_stepwise
+)
+
+# compare BIC
+min(summary_back$bic)   
+min(summary_forw$bic)   
+min(summary_step$bic)  
+#sequential (step) has lowest BIC
 
 ```
+
+```{r}
+# best subset selection with sequential variables
+  
+step_filtered <- training_final %>%
+  select(c(all_of(step_selected_vars), Ranking))
+
+# dataframe with only selected 30 variables
+
+best_subset <- regsubsets(Ranking ~ ., data = step_filtered, nvmax = 30) 
+summary_best <- summary(best_subset)
+
+#number of variables with smallest BIC is 30
+best_model_subset <- which.min(summary_best$bic)
+
+
+```
+
