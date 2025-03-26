@@ -1,0 +1,111 @@
+---
+title: "PCA"
+output: pdf_document
+date: "2025-03-20"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+library(ggcorrplot)
+library(corrr)
+library(FactoMineR)
+```
+
+```{r}
+lasso_filtered <- read.csv("lasso_select.csv")
+
+lasso_filtered <- lasso_filtered %>% 
+  select(-X)
+```
+
+```{r}
+lasso_pca <- lasso_filtered[, -which(names(lasso_filtered) == "Ranking")]
+pca_result <- prcomp(lasso_pca, scale = TRUE)
+summary(pca_result)
+
+
+# top 5 contributing variables for the first 10 principal components
+top_vars_10 <- lapply(1:10, function(i) {
+  x <- pca_result$rotation[, i]
+  top_contributors <- sort(abs(x), decreasing = TRUE)[1:5]
+  var_names <- names(top_contributors)
+  data.frame(PC = paste0("PC", i), Variable = var_names, Loading = top_contributors)
+})
+
+
+top_vars_10_df <- do.call(rbind, top_vars_10)
+
+# Print the result
+print(top_vars_10_df)
+
+list_pca <- top_vars_10_df[, 2]
+```
+
+
+```{r}
+# backwards selection
+back_models <- regsubsets(Ranking~., data = lasso_filtered, nvmax = 30, method = "backward")
+summary_back <- summary(back_models)
+
+# save optimal model based on bic
+best_model_back <- summary_back$which[which.min(summary_back$bic),]
+models_backward <- summary_back$which
+
+back_vars <- names(which(best_model_back))
+```
+
+
+
+
+```{r}
+# forward selection
+forw_models <- regsubsets(Ranking~., data = lasso_filtered, nvmax = 30, method = "forward")
+summary_forw <- summary(forw_models)
+
+# save optimal model based on bic
+best_model_forw <- summary_forw$which[which.min(summary_forw$bic),]
+models_forward <- summary_forw$which
+
+forw_vars <- names(which(best_model_forw))
+```
+
+```{r}
+# stepwise selection
+
+step_models <- regsubsets(Ranking~., data = lasso_filtered, nvmax = 30, method = "seqrep")
+summary_step <- summary(step_models)
+
+# save optimal model based on bic
+best_model_step <- summary_step$which[which.min(summary_step$bic),]
+
+# they dropped the factor variable itself, but added the factored variable name with the value string attached back to the formula, which the function doesn't recognize
+
+
+# remove them (and intercept) and add original variable back
+step_selected_vars <- names(which(best_model_step))[-c(1, 2, 3, 4, 5, 6)]
+step_selected_vars <- c(step_selected_vars, "LOCALE", "CIP15BACHL", "CIP39BACHL", "CIP50BACHL")
+which(step_selected_vars == "CIP15BACHL1") 
+which(step_selected_vars == "CIP39BACHL1")
+which(step_selected_vars == "CIP50BACHL1")
+```
+
+```{r}
+# compare with stepwise
+
+length(list_pca)
+length(intersect(back_vars, list_pca))
+length(intersect(forw_vars, list_pca))
+length(intersect(step_selected_vars, list_pca))
+
+length(intersect(back_vars, forw_vars))
+length(intersect(back_vars, step_selected_vars))
+length(intersect(step_selected_vars, forw_vars))
+
+combined_list <- unique(c(back_vars, forw_vars, step_selected_vars))
+length(combined_list)
+
+length(unique(c(combined_list, list_pca)))
+length(intersect(combined_list, list_pca))
+
+```
+
+

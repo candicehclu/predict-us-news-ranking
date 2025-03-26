@@ -229,6 +229,7 @@ training_final <- training_final %>%
 
 training <- subset(training_final, select = -c(Ranking, UNITID, Year, OPEID, OPEID6, INSTNM, CITY, STABBR, ZIP, LONGITUDE, LATITUDE, RELAFFIL, X))
 
+
 training_matrix <- data.matrix(training)
 ```
 
@@ -271,6 +272,8 @@ print(selected_vars)
 
 lasso_filtered <- training_final %>%
   select(c(all_of(selected_vars), Ranking))
+
+# write.csv(lasso_filtered, "lasso_select.csv")
 
 # backwards selection
 back_models <- regsubsets(Ranking~., data = lasso_filtered, nvmax = 30, method = "backward")
