@@ -275,6 +275,16 @@ lasso_filtered <- training_final %>%
 
 # write.csv(lasso_filtered, "lasso_select.csv")
 
+lasso_filtered <- lasso_filtered %>%
+  mutate(CIP15BACHL = as.numeric(CIP15BACHL),
+         CIP39BACHL = as.numeric(CIP39BACHL),
+         CIP50BACHL = as.numeric(CIP50BACHL))
+
+testing <- testing %>%
+  mutate(CIP15BACHL = as.numeric(CIP15BACHL),
+         CIP39BACHL = as.numeric(CIP39BACHL),
+         CIP50BACHL = as.numeric(CIP50BACHL))
+
 # backwards selection
 back_models <- regsubsets(Ranking~., data = lasso_filtered, nvmax = 30, method = "backward")
 summary_back <- summary(back_models)
@@ -297,29 +307,52 @@ summary_forw <- summary(forw_models)
 # save optimal model based on bic
 best_model_forw <- summary_forw$which[which.min(summary_forw$bic),]
 models_forward <- summary_forw$which
+
+# remove intercept
+forw_selected_vars <- names(which(best_model_forw))[-c(1)]
+print(forw_selected_vars)
+
+# refit model with selected variables
+formula_forw <- as.formula(paste("Ranking ~", paste(forw_selected_vars, collapse = " + ")))
+final_model_forw <- lm(formula_forw, data = lasso_filtered)
+
+# check model performance
+summary(final_model_forw)
+
+# predict, round, and print
+predictions_forw <- predict(final_model_forw, newdata = testing[, forw_selected_vars])
+predictions_forw_rounded <- sapply(predictions_forw, function(x) round(x))
+print(predictions_forw_rounded)
 ```
 
 ```{r}
 # stepwise selection
 
+lasso_filtered <- lasso_filtered %>%
+  mutate(CIP15BACHL = as.numeric(CIP15BACHL),
+         CIP39BACHL = as.numeric(CIP39BACHL),
+         CIP50BACHL = as.numeric(CIP50BACHL),
+         LOCALE = as.factor(LOCALE))
+
+testing <- testing %>%
+  mutate(CIP15BACHL = as.numeric(CIP15BACHL),
+         CIP39BACHL = as.numeric(CIP39BACHL),
+         CIP50BACHL = as.numeric(CIP50BACHL),
+         LOCALE = as.factor(LOCALE))
 step_models <- regsubsets(Ranking~., data = lasso_filtered, nvmax = 30, method = "seqrep")
 summary_step <- summary(step_models)
 
 # save optimal model based on bic
 best_model_step <- summary_step$which[which.min(summary_step$bic),]
 
-# they dropped the factor variable itself, but added the factored variable name with the value string attached back to the formula, which the function doesn't recognize
-
 # check which variables are newly created and add back
 missing_vars <- setdiff(selected_vars, colnames(lasso_filtered))
 print(missing_vars)
 
-# remove them (and intercept) and add original variable back
-step_selected_vars <- names(which(best_model_step))[-c(1, 2, 3, 4, 5, 6)]
-step_selected_vars <- c(step_selected_vars, "LOCALE", "CIP15BACHL", "CIP39BACHL", "CIP50BACHL")
-which(step_selected_vars == "CIP15BACHL1") 
-which(step_selected_vars == "CIP39BACHL1")
-which(step_selected_vars == "CIP50BACHL1")
+# remove intercept
+step_selected_vars <- names(which(best_model_step))[-c(1)]
+
+print(step_selected_vars)
 
 # refit model with selected variables
 formula <- as.formula(paste("Ranking ~", paste(step_selected_vars, collapse = " + ")))
