@@ -245,9 +245,17 @@ length(intersect(combined_list, list_pca))
 ```
 
 ```{r}
+# create dictionary and append stepwise model coefficient to it
 full_dictionary <- readxl::read_excel("CollegeScorecardDataDictionary.xlsx", sheet = 4)
 
 dictionary <- full_dictionary %>%
   select(c("NAME OF DATA ELEMENT", "VARIABLE NAME")) %>% na.omit("VARIABLE NAME") %>%
   filter(`VARIABLE NAME` %in% step_selected_vars)
+
+coefficients <- as.data.frame(coef(final_model_step)) %>%
+  tibble::rownames_to_column(var = "Variable") %>%
+  rename(Coefficient = 2) 
+coefficients <- coefficients[-1,]
+
+final_dictionary <- full_join(dictionary, coefficients, by = c("VARIABLE NAME" = "Variable"))
 ```
