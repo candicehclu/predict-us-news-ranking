@@ -88,6 +88,14 @@ summary(final_model_back)
 predictions_back <- predict(final_model_back, newdata = testing[, back_selected_vars])
 predictions_back_rounded <- sapply(predictions_back, function(x) round(x))
 print(predictions_back_rounded)
+
+final_rank_back <- rank(predictions_back)
+
+residual <- {}
+for (i in 1:50) {
+  residual[i] <-  abs(predictions_back_rounded[i] - testing_final$X2025[i])
+}
+sum(residual) / 100
 ```
 
 ```{r}
@@ -118,6 +126,14 @@ summary(final_model_forw)
 predictions_forw <- predict(final_model_forw, newdata = testing[, forw_selected_vars])
 predictions_forw_rounded <- sapply(predictions_forw, function(x) round(x))
 print(predictions_forw_rounded)
+
+final_rank_forw <- rank(predictions_forw)
+
+residual <- {}
+for (i in 1:50) {
+  residual[i] <-  abs(predictions_forw_rounded[i] - testing_final$X2025[i])
+}
+sum(residual) / 100
 ```
 
 ```{r}
@@ -144,21 +160,72 @@ summary(final_model_step)
 
 # predict, round, and print
 predictions_step <- predict(final_model_step, newdata = testing[, step_selected_vars])
-predictions_step_rounded <- sapply(predictions_step, function(x) round(x))
-print(predictions_step_rounded)
+final_rank_step <- rank(predictions_step)
+# predictions_step_rounded <- sapply(predictions_step, function(x) round(x))
+# print(predictions_step_rounded)
 
-# calculate accuracy
-residual <- {}
-for (i in 1:50) {
-  residual[i] <-  abs(predictions_step_rounded[i] - testing_final$X2025[i])
-}
-sum(residual) / 100
+
 
 # print(step_selected_vars)
 ```
+```{r}
+# append results to testing
+results_final <- testing_final %>%
+  select(c(UNITID, INSTNM, X2025)) %>%
+  mutate(actual_rank = X2025) %>%
+  select(-X2025)
+results_final$step_predict <- final_rank_step
+results_final$forw_predict <- final_rank_forw
+results_final$back_predict <- final_rank_back
+```
+```{r}
+# Comparing different rankings
+
+# spearman's rank correlation
+cor(results_final$step_predict, results_final$actual_rank, method = "spearman")
+cor(results_final$forw_predict, results_final$actual_rank, method = "spearman")
+cor(results_final$back_predict, results_final$actual_rank, method = "spearman")
+# forward selection wins!
+
+# mean absolute error
+mae <- function(rank_vec) {
+  mean(abs(rank_vec[i] - results_final$actual_rank[i]))
+}
+mae(results_final$step_predict)
+mae(results_final$forw_predict)
+mae(results_final$back_predict)
+# stepwise wins!
+
+# penalized mean absolute error (adds linear penalty, higher penalty for top ranks)
+weighted_mae <- function(pred, true) {
+  n <- length(true)
+  weights <- rev(1:n)  # Higher weight for top ranks
+  sum(weights * abs(pred - true)) / sum(weights)
+}
+weighted_mae(results_final$step_predict, results_final$actual_rank)
+weighted_mae(results_final$forw_predict, results_final$actual_rank)
+weighted_mae(results_final$back_predict, results_final$actual_rank)
+# stepwise wins!
+
+# kendall's tau correlation
+cor(results_final$step_predict, results_final$actual_rank, method = "kendall")
+cor(results_final$forw_predict, results_final$actual_rank, method = "kendall")
+cor(results_final$back_predict, results_final$actual_rank, method = "kendall")
+# stepwise wins!
+
+# levenshtein distance (edit distance)
+
+# install.packages("stringdist")
+library(stringdist)
+mean(stringdist(results_final$step_predict, results_final$actual_rank, method = "lv"))
+mean(stringdist(results_final$forw_predict, results_final$actual_rank, method = "lv"))
+mean(stringdist(results_final$back_predict, results_final$actual_rank, method = "lv"))
+# stepwise wins!
+```
+
 
 ```{r}
-# compare with stepwise
+# compare pca with stepwise
 
 length(list_pca)
 length(intersect(back_vars, list_pca))
