@@ -14,6 +14,7 @@ library(leaps)
 
 ```{r}
 lasso_filtered <- read.csv("lasso_select.csv")
+testing <- read.csv("testing.csv")
 
 lasso_filtered <- lasso_filtered %>% 
   select(-X)
@@ -202,7 +203,7 @@ step_selected_vars <- c(step_selected_vars, "LOCALE", "CIP15BACHL", "CIP39BACHL"
 
 
 # refit model with selected variables
-formula <- as.formula(paste("Ranking ~", paste(step_selected_vars, collapse = " + ")))
+formula_step <- as.formula(paste("Ranking ~", paste(step_selected_vars, collapse = " + ")))
 
 # run best subsets
 # best_subsets_full <- regsubsets(
@@ -217,7 +218,7 @@ formula <- as.formula(paste("Ranking ~", paste(step_selected_vars, collapse = " 
 # summary_best_step$bic
 
 # create model from stepwise selected variables
-final_model_step <- lm(formula, data = lasso_filtered)
+final_model_step <- lm(formula_step, data = lasso_filtered)
 
 # check model performance
 summary(final_model_step)
@@ -293,6 +294,7 @@ mean(stringdist(results_final$forw_predict, results_final$actual_rank, method = 
 mean(stringdist(results_final$back_predict, results_final$actual_rank, method = "lv"))
 mean(stringdist(results_final$forw_best_predict, results_final$actual_rank, method = "lv"))
 # step < forw_best < back < forw
+# write.csv(results_final, "final_predictions.csv")
 ```
 
 
@@ -314,7 +316,6 @@ length(combined_list)
 
 length(unique(c(combined_list, list_pca)))
 length(intersect(combined_list, list_pca))
-
 ```
 
 ```{r}
@@ -330,11 +331,16 @@ coefficients <- as.data.frame(coef(final_model_step)) %>%
   rename(Coefficient = 2) 
 coefficients <- coefficients[-1,]
 
-final_dictionary <- full_join(dictionary, coefficients, by = c("VARIABLE NAME" = "Variable"))
+coefficients_final <- coefficients %>%
+  mutate(abs_coef = abs(Coefficient)) %>%
+  mutate(weights = 100 * abs_coef / sum(abs_coef)) %>%
+  mutate(weights_rounded = round(weights, 2))
+
+final_dictionary <- full_join(dictionary, coefficients_final, by = c("VARIABLE NAME" = "Variable"))
 
 final_dictionary <- final_dictionary %>%
   mutate(impact = ifelse(Coefficient > 0, "neg", "pos")) %>%
-  select(c(`NAME OF DATA ELEMENT`, impact, Coefficient, `VARIABLE NAME`))
+  select(c(`NAME OF DATA ELEMENT`, impact, weights_rounded, Coefficient, `VARIABLE NAME`))
 
 # factors that improve ranking
 final_dictionary %>%
@@ -369,5 +375,4 @@ usnews_formula <- data.frame(
 
 # Save as CSV
 # write.csv(usnews_formula, "us_news_formula.csv", row.names = FALSE)
-
 ```

@@ -7,6 +7,7 @@ date: "2025-03-20"
 knitr::opts_chunk$set(echo = TRUE)
 dict <- read.csv("final_dictionary.csv")
 formula <- read.csv("us_news_formula.csv")
+predictions <- read.csv("final_predictions.csv")
 ```
 
 ## Todo
@@ -18,35 +19,39 @@ formula <- read.csv("us_news_formula.csv")
 - The borrower debt variable is sourced from college scorecard (source: https://www.usnews.com/education/best-colleges/articles/ranking-criteria-and-weights)
 - US News explicitly said no admission rates, but our model had one variable for admission rate
 - US news factors that we know are included in our model:
-  - **Student-faculty ratio**: Undergraduate student to instructional faculty ratio
-  - **Graduation rates**: `Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for white students`, `Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for black students`, `Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) , pooled in two-year rolling averages and suppressed for small n size`
-  - **Student-faculty ratio**: Instructional expenditures per full-time equivalent student
+  - **Student-faculty ratio**: 
+  - **Graduation rates**: Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) , pooled in two-year rolling averages and suppressed for small n size, Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for white students, Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for black students  
+  - **Faculty salaries**: Average faculty salary 
+  - **Full-time faculty**: Proportion of faculty that is full-time
+  - **Financial resources per student**: Instructional expenditures per full-time equivalent student
   
 - Things that are not directly on the formula but kinda adjacent:
-  - **Borrower debt**: Three-year cohort default rate
-  - **Retention rate**: `Percent who transferred to a 2-year institution and withdrew within 2 years`, `Percent of students who never received a Pell Grant at the institution and who transferred to a 4-year institution and were still enrolled within 2 years`, `First-time, full-time student retention rate at four-year institutions`
+  - **Borrower debt**: Three-year cohort default rate, Percentage of undergraduate federal student loan borrowers in deferment after 2 years, suppressed for n<30
+  - **Retention rate**: 
   
 - Unclassified (because I am tired):
-  - Bachelor's degree in Engineering Technologies And Engineering-Related Fields
-  - Bachelor's degree in Theology And Religious Vocations
-  - Bachelor's degree in Visual And Performing Arts
-  - Three-year repayment rate for independent students
-  - Five-year repayment rate for students who are not first-generation
-  - Average family income of dependent students in real 2015 dollars.
-  - Number of students in the family income dependent students cohort
-  - Log of the median household income
-  - Number of graduate students
-  - Percentage of part-time, first-time student receiving an award within 6 years of entry
-  - Graduate borrower completers graduate federal student loan dollar-based 1-year repayment rate numerator
-  - Graduate borrower completers graduate federal student loan dollar-based 1-year repayment rate denominator
-  - Percentage of undergraduate federal student loan borrowers in forbearance after 1 year
-  - Percentage of undergraduate federal student loan borrowers in deferment after 2 years, suppressed for n<30
-  - Percentage of first-time Pell Grant recipient students receiving an award within 8 years of entry, pooled in rolling averages and suppressed for small n size
-  - Percentage of part-time Pell Grant recipient students that did not receive an award and whose enrollment status is unknown after leaving this institution within 8 years of entry, pooled in rolling averages and suppressed for small n size
-  - Undergraduate unknown completion status undergraduate federal student loan borrower-based 3-year borrower count
-  - Share of full time faculty that are of unknown race/ethnicity
-  - Admission rate, suppressed for n<30
-  - Percentage of first-time non-Pell Grant recipient students receiving an award within 8 years of entry
+Locale of institution  
+Bachelor's degree in Engineering Technologies And Engineering-Related Fields.  
+Bachelor's degree in Theology And Religious Vocations.  
+Bachelor's degree in Visual And Performing Arts.  
+Percent of students who never received a Pell Grant at the institution and who transferred to a 4-year institution and were still enrolled within 2 years  
+Percent of middle-income (between $30,000 and $75,000 in nominal family income) students who completed within 4 years at original institution  
+Percent of students who never received a Pell Grant at the institution and withdrew from original institution within 4 years  
+Percent of female students who transferred to a 4-year institution and completed within 6 years  
+One-year repayment rate for students who are not first-generation  
+Aided students with family incomes between $48,001-$75,000 in nominal dollars  
+The median debt for independent students  
+Number of students in the 7-year repayment rate of independent students cohort  
+Adjusted cohort count for Direct Subsidized Loan recipients who did not receive a Pell Grant completion rate at four-year institutions (denominator of 150% Direct Subsidized Loan recipient who did not receive a Pell Grant completion rate)  
+Percentage of part-time, not first-time students that did not receive an award and whose enrollment status is unknown after leaving this institution within 8 years of entry, pooled in rolling averages and suppressed for small n size  
+Percentage of undergraduate federal student loan borrowers in forbearance after 1 year  
+Undergraduate unknown completion status undergraduate federal student loan borrower-based 2-year borrower count  
+Cost of attendance: off-campus other expenses  
+Percentage of first-time Pell Grant recipient students receiving an award within 8 years of entry, pooled in rolling averages and suppressed for small n size  
+Share of full time faculty that are U.S. Nonresidents  
+Share of full time faculty that are of unknown race/ethnicity  
+Percentage of first-time non-Pell Grant recipient students receiving an award within 8 years of entry
+
 
 
 ## US News Variables

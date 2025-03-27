@@ -426,5 +426,7 @@ summary_best <- summary(best_subset)
 #number of variables with smallest BIC is 30
 best_model_subset <- which.min(summary_best$bic)
 
+# write.csv(testing, "testing.csv")
+
 ```
 
