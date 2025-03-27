@@ -16,7 +16,38 @@ formula <- read.csv("us_news_formula.csv")
 ## Notes
 
 - The borrower debt variable is sourced from college scorecard (source: https://www.usnews.com/education/best-colleges/articles/ranking-criteria-and-weights)
-- 
+- US News explicitly said no admission rates, but our model had one variable for admission rate
+- US news factors that we know are included in our model:
+  - **Student-faculty ratio**: Undergraduate student to instructional faculty ratio
+  - **Graduation rates**: `Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for white students`, `Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for black students`, `Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) , pooled in two-year rolling averages and suppressed for small n size`
+  - **Student-faculty ratio**: Instructional expenditures per full-time equivalent student
+  
+- Things that are not directly on the formula but kinda adjacent:
+  - **Borrower debt**: Three-year cohort default rate
+  - **Retention rate**: `Percent who transferred to a 2-year institution and withdrew within 2 years`, `Percent of students who never received a Pell Grant at the institution and who transferred to a 4-year institution and were still enrolled within 2 years`, `First-time, full-time student retention rate at four-year institutions`
+  
+- Unclassified (because I am tired):
+  - Bachelor's degree in Engineering Technologies And Engineering-Related Fields
+  - Bachelor's degree in Theology And Religious Vocations
+  - Bachelor's degree in Visual And Performing Arts
+  - Three-year repayment rate for independent students
+  - Five-year repayment rate for students who are not first-generation
+  - Average family income of dependent students in real 2015 dollars.
+  - Number of students in the family income dependent students cohort
+  - Log of the median household income
+  - Number of graduate students
+  - Percentage of part-time, first-time student receiving an award within 6 years of entry
+  - Graduate borrower completers graduate federal student loan dollar-based 1-year repayment rate numerator
+  - Graduate borrower completers graduate federal student loan dollar-based 1-year repayment rate denominator
+  - Percentage of undergraduate federal student loan borrowers in forbearance after 1 year
+  - Percentage of undergraduate federal student loan borrowers in deferment after 2 years, suppressed for n<30
+  - Percentage of first-time Pell Grant recipient students receiving an award within 8 years of entry, pooled in rolling averages and suppressed for small n size
+  - Percentage of part-time Pell Grant recipient students that did not receive an award and whose enrollment status is unknown after leaving this institution within 8 years of entry, pooled in rolling averages and suppressed for small n size
+  - Undergraduate unknown completion status undergraduate federal student loan borrower-based 3-year borrower count
+  - Share of full time faculty that are of unknown race/ethnicity
+  - Admission rate, suppressed for n<30
+  - Percentage of first-time non-Pell Grant recipient students receiving an award within 8 years of entry
+
 
 ## US News Variables
 
@@ -34,11 +65,12 @@ formula <- read.csv("us_news_formula.csv")
 - **Borrower debt**: each school's typical average accumulated federal loan debt among only borrowers who graduated                                            
 
 #### Faculty related
-- **Faculty salaries**: averaged salaries from all full-time instructional tenured and nontenured faculty                                         
-- **Full-time faculty**: proportion of the fall instructional faculty that was full time                                        
-- **Student-faculty ratio**: ratio of full-time-equivalent students to full-time-equivalent faculty members during fall, excluding faculty that only teaches graduate level                                    
+- **Faculty salaries** (+2%): averaged salaries from all full-time instructional tenured and nontenured faculty                                         
+- **Full-time faculty** (+1%): proportion of the fall instructional faculty that was full time                                        
+- **Student-faculty ratio** (+1%): ratio of full-time-equivalent students to full-time-equivalent faculty members during fall, excluding faculty that only teaches graduate level                                    
 
-**Citations** (Note: national universities only)
+## Citations (Note: national universities only)
+
 - Citations per publication                                
 - Field-Weighted Citation Impact                           
 - Publication share in the Top 5% of Journals by CiteScore 
@@ -51,4 +83,5 @@ formula <- read.csv("us_news_formula.csv")
 
 ```{r include=F, echo=F}
 print(formula$Indicator, formula$schools_with_sat.act_2025)
+print(final_dictionary)
 ```
