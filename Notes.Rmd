@@ -1,0 +1,54 @@
+---
+title: "Notes"
+output: pdf_document
+date: "2025-03-20"
+---
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+dict <- read.csv("final_dictionary.csv")
+formula <- read.csv("us_news_formula.csv")
+```
+
+## Todo
+- Figure out ways to standardize variables so we can directly compared how US News weighted things vs How our model weighted things
+- Keep notes on how we cleaned data and evaluated models
+
+## Notes
+
+- The borrower debt variable is sourced from college scorecard (source: https://www.usnews.com/education/best-colleges/articles/ranking-criteria-and-weights)
+- 
+
+## US News Variables
+
+#### Retention and graduation rates
+- **Graduation rates**: percentage of entering full-time first-year bachelor's or equivalent degree-seeking students who completed a bachelor's or equivalent degree within a six-year period (averaged over four years)
+- **First-year retention rates**: average proportion of the first-year classes entering who returned to school the following fall                               
+- **Graduation rate performance**: four-year rolling average comparing each college's six-year graduation rates with what U.S. News predicted for their corresponding start year through entering classes. If the actual graduation rate is higher than the predicted rate, the college is enhancing achievement or is overperforming. If its actual graduation rate is lower than the predicted rate, it's underperforming.
+
+#### First gen and Pell related
+- **Pell graduation rates**: six-year graduation rates of students who received Pell Grants                                    
+- **Pell graduation performance**: success at achieving equitable outcomes for students from underserved backgrounds. Initial score is calculated by comparing Pell graduation rates to non-Pell graduating rates (highest is 1), and schools whose entering cohorts were at least 50% Pell Grant students had their scores augmented by 0.5; schools below 50% Pell Grant students had their scores augmented by the proportion that received Pell Grants.                              
+
+#### Graduate outcomes
+- **College grads earning more than a high school grad**: proportion of a school's federal loan recipients who in five years since completing their undergraduate degrees were earning more than the median salary of a 25-34yo whose highest level of education is high school      
+- **Borrower debt**: each school's typical average accumulated federal loan debt among only borrowers who graduated                                            
+
+#### Faculty related
+- **Faculty salaries**: averaged salaries from all full-time instructional tenured and nontenured faculty                                         
+- **Full-time faculty**: proportion of the fall instructional faculty that was full time                                        
+- **Student-faculty ratio**: ratio of full-time-equivalent students to full-time-equivalent faculty members during fall, excluding faculty that only teaches graduate level                                    
+
+**Citations** (Note: national universities only)
+- Citations per publication                                
+- Field-Weighted Citation Impact                           
+- Publication share in the Top 5% of Journals by CiteScore 
+- Publication share in the Top 25% of Journals by CiteScore
+
+**Others**
+- **Standardized tests**: assessed schools on their fall 2023 SAT/ACT scores if they were reported on at least half of their new entrants, if less than half this category is cancelled and weights of graduation rates is increase by 5%
+- **Financial resources per student**: represents a school's ability to have a strong environment for instruction and impact in academia, measured by comparing an institution's total expenditures on instruction, research, public service, academic support, student services and institutional support against its total academic year full-time equivalent student enrollment (only academic spending).
+- **Peer assessment**
+
+```{r include=F, echo=F}
+print(formula$Indicator, formula$schools_with_sat.act_2025)
+```

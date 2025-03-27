@@ -258,4 +258,43 @@ coefficients <- as.data.frame(coef(final_model_step)) %>%
 coefficients <- coefficients[-1,]
 
 final_dictionary <- full_join(dictionary, coefficients, by = c("VARIABLE NAME" = "Variable"))
+
+final_dictionary <- final_dictionary %>%
+  mutate(impact = ifelse(Coefficient > 0, "neg", "pos")) %>%
+  select(c(`NAME OF DATA ELEMENT`, impact, Coefficient, `VARIABLE NAME`))
+
+# factors that improve ranking
+final_dictionary %>%
+  filter(impact == "pos") %>%
+  print(`NAME OF DATA ELEMENT`)
+
+# factors that reduce ranking
+final_dictionary %>%
+  filter(impact == "neg") %>%
+  print(`NAME OF DATA ELEMENT`)
+
+# write.csv(final_dictionary, "final_dictionary.csv")
+```
+
+```{r}
+# Create a dataframe with the extracted table
+usnews_formula <- data.frame(
+  Indicator = c("Graduation rates", "First-year retention rates", "Graduation rate performance", 
+                "Pell graduation rates", "Pell graduation performance", "First-generation graduation rates",
+                "First-generation graduation rate performance", "College grads earning more than a high school grad",
+                "Borrower debt", "Peer assessment", "Financial resources per student", "Faculty salaries",
+                "Full-time faculty", "Student-faculty ratio", "Standardized tests", "Citations per publication",
+                "Field-Weighted Citation Impact", "Publication share in the Top 5% of Journals by CiteScore",
+                "Publication share in the Top 25% of Journals by CiteScore", "TOTAL"),
+  
+  `schools_with_sat/act_2025` = c(16, 5, 10, 5.5, 5.5, 0, 0, 5, 5, 20, 8, 6, 2, 3, 5, 1.25, 1.25, 1, 0.5, 100),
+  
+  `schools_without_sat/act_2025` = c(21, 5, 10, 5.5, 5.5, 0, 0, 5, 5, 20, 8, 6, 2, 3, 0, 1.25, 1.25, 1, 0.5, 100),
+  
+  `2024 Weight` = c(16, 5, 10, 3, 3, 2.5, 2.5, 5, 5, 20, 8, 6, 2, 3, 5, 1.25, 1.25, 1, 0.5, 100)
+)
+
+# Save as CSV
+# write.csv(usnews_formula, "us_news_formula.csv", row.names = FALSE)
+
 ```
