@@ -79,6 +79,20 @@ print(back_selected_vars)
 
 # refit model with selected variables
 formula_back <- as.formula(paste("Ranking ~", paste(back_selected_vars, collapse = " + ")))
+
+# run best subsets
+# best_subsets_back <- regsubsets(
+#  formula_back, 
+#  data = lasso_filtered,
+#  nvmax = 30,
+#  really.big = TRUE
+#)
+
+# best subsets gave the same model as backwards
+# summary_best_back <- summary(best_subsets_back)
+# summary_best_back$bic
+
+# build model
 final_model_back <- lm(formula_back, data = lasso_filtered)
 
 # check model performance
@@ -117,6 +131,20 @@ print(forw_selected_vars)
 
 # refit model with selected variables
 formula_forw <- as.formula(paste("Ranking ~", paste(forw_selected_vars, collapse = " + ")))
+
+# run best subsets
+best_subsets_forw <- regsubsets(
+  formula_forw, 
+  data = lasso_filtered,
+  nvmax = 30,
+  really.big = TRUE
+)
+
+# best subsets gave a different model
+summary_best_forw <- summary(best_subsets_forw)
+summary_best_forw$bic
+
+# build model
 final_model_forw <- lm(formula_forw, data = lasso_filtered)
 
 # check model performance
@@ -128,12 +156,33 @@ predictions_forw_rounded <- sapply(predictions_forw, function(x) round(x))
 print(predictions_forw_rounded)
 
 final_rank_forw <- rank(predictions_forw)
+```
+```{r}
+# build model for forward + best subsets
 
-residual <- {}
-for (i in 1:50) {
-  residual[i] <-  abs(predictions_forw_rounded[i] - testing_final$X2025[i])
-}
-sum(residual) / 100
+# save optimal model based on bic
+best_model_forw_best <- summary_best_forw$which[which.min(summary_best_forw$bic),]
+forw_best_vars <- names(which(best_model_forw_best))
+
+# remove intercept (selected LOCALE13)
+forw_best_vars <- names(which(best_model_forw_best))[-c(1, 28)]
+
+# add LOCALE back
+forw_best_vars <- c(forw_best_vars, "LOCALE")
+
+# rebuild formula with selected variables
+formula_forw_best <- as.formula(paste("Ranking ~", paste(forw_best_vars, collapse = " + ")))
+
+# build model
+final_model_forw_best <- lm(formula_forw_best, data = lasso_filtered)
+
+# check model performance
+summary(final_model_forw_best)
+
+# predict, round, and print
+predictions_forw <- predict(final_model_forw_best, newdata = testing[, forw_best_vars])
+final_rank_forw_best <- rank(predictions_forw)
+
 ```
 
 ```{r}
@@ -151,23 +200,33 @@ step_selected_vars <- names(which(best_model_step))[-c(1, 2, 3, 4, 5, 6)]
 # for each , extract and make it 
 step_selected_vars <- c(step_selected_vars, "LOCALE", "CIP15BACHL", "CIP39BACHL", "CIP50BACHL")
 
+
 # refit model with selected variables
 formula <- as.formula(paste("Ranking ~", paste(step_selected_vars, collapse = " + ")))
+
+# run best subsets
+# best_subsets_full <- regsubsets(
+#  formula, 
+#  data = lasso_filtered,
+#  nvmax = 30,
+#  really.big = TRUE
+#)
+
+# best subsets gave the same model as stepwise
+# summary_best_step <- summary(best_subsets_full)
+# summary_best_step$bic
+
+# create model from stepwise selected variables
 final_model_step <- lm(formula, data = lasso_filtered)
 
 # check model performance
 summary(final_model_step)
 
-# predict, round, and print
+# predict and save rank
 predictions_step <- predict(final_model_step, newdata = testing[, step_selected_vars])
 final_rank_step <- rank(predictions_step)
-# predictions_step_rounded <- sapply(predictions_step, function(x) round(x))
-# print(predictions_step_rounded)
-
-
-
-# print(step_selected_vars)
 ```
+
 ```{r}
 # append results to testing
 results_final <- testing_final %>%
@@ -177,15 +236,24 @@ results_final <- testing_final %>%
 results_final$step_predict <- final_rank_step
 results_final$forw_predict <- final_rank_forw
 results_final$back_predict <- final_rank_back
+results_final$forw_best_predict <- final_rank_forw_best
 ```
 ```{r}
 # Comparing different rankings
+
+# adjusted R^2
+# step = 0.9711
+# forw = 0.9686 
+# back = 0.9682
+# forw_best = 0.9674
+# step > forw > back > forw_best
 
 # spearman's rank correlation
 cor(results_final$step_predict, results_final$actual_rank, method = "spearman")
 cor(results_final$forw_predict, results_final$actual_rank, method = "spearman")
 cor(results_final$back_predict, results_final$actual_rank, method = "spearman")
-# forward selection wins!
+cor(results_final$forw_best_predict, results_final$actual_rank, method = "spearman")
+# step > forw_best > back > forw
 
 # mean absolute error
 mae <- function(rank_vec) {
@@ -194,7 +262,8 @@ mae <- function(rank_vec) {
 mae(results_final$step_predict)
 mae(results_final$forw_predict)
 mae(results_final$back_predict)
-# stepwise wins!
+mae(results_final$forw_best_predict)
+# step < back < forw < forw_best
 
 # penalized mean absolute error (adds linear penalty, higher penalty for top ranks)
 weighted_mae <- function(pred, true) {
@@ -205,13 +274,15 @@ weighted_mae <- function(pred, true) {
 weighted_mae(results_final$step_predict, results_final$actual_rank)
 weighted_mae(results_final$forw_predict, results_final$actual_rank)
 weighted_mae(results_final$back_predict, results_final$actual_rank)
-# stepwise wins!
+weighted_mae(results_final$forw_best_predict, results_final$actual_rank)
+# step < forw < forw_best < back
 
 # kendall's tau correlation
 cor(results_final$step_predict, results_final$actual_rank, method = "kendall")
 cor(results_final$forw_predict, results_final$actual_rank, method = "kendall")
 cor(results_final$back_predict, results_final$actual_rank, method = "kendall")
-# stepwise wins!
+cor(results_final$forw_best_predict, results_final$actual_rank, method = "kendall")
+# step > forw_best > back > forw
 
 # levenshtein distance (edit distance)
 
@@ -220,7 +291,8 @@ library(stringdist)
 mean(stringdist(results_final$step_predict, results_final$actual_rank, method = "lv"))
 mean(stringdist(results_final$forw_predict, results_final$actual_rank, method = "lv"))
 mean(stringdist(results_final$back_predict, results_final$actual_rank, method = "lv"))
-# stepwise wins!
+mean(stringdist(results_final$forw_best_predict, results_final$actual_rank, method = "lv"))
+# step < forw_best < back < forw
 ```
 
 
@@ -231,6 +303,7 @@ length(list_pca)
 length(intersect(back_vars, list_pca))
 length(intersect(forw_vars, list_pca))
 length(intersect(step_selected_vars, list_pca))
+length(intersect(forw_best_vars, list_pca))
 
 length(intersect(back_vars, forw_vars))
 length(intersect(back_vars, step_selected_vars))
