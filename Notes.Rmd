@@ -13,9 +13,31 @@ us_formula_weights <- read.csv("us_news_weights.csv")
 predictions <- read.csv("final_predictions.csv")
 ```
 
-## Todo
-- Figure out ways to standardize variables so we can directly compared how US News weighted things vs How our model weighted things
-- Keep notes on how we cleaned data and evaluated models
+```{r}
+# graph to compare weights of each category from our and us news formula
+weights_by_cat <- dict %>%
+  group_by(category) %>%
+  summarize(weights = sum(weights_rounded)) %>%
+  print()
+
+weights_by_cat$weights[8] <- 0.12
+weights_by_cat <- weights_by_cat[-1,]
+weights_by_cat <- weights_by_cat %>%
+  mutate(From = "ours")
+
+us_formula_weight <- us_formula_weights[-7,]
+us_formula_weight <- rbind(us_formula_weight, data.frame(category = "affordability", weight = 0))
+us_formula_weight <- us_formula_weight %>%
+  mutate(weights = weight) %>%
+  select(c("weights", "category")) %>%
+  mutate(From = "original")
+
+weights_compare <- rbind(us_formula_weight, weights_by_cat)
+
+ggplot(weights_compare, aes(fill = From, x = category, y = weights)) +
+  geom_bar(stat = "identity", position = "dodge") +
+  labs(fill = "Formula")
+```
 
 ## Notes
 
@@ -36,11 +58,6 @@ predictions <- read.csv("final_predictions.csv")
   
 - New things
   - location, what degrees they offer, cost of attendance, median debt for independent students, faculty diversity
-  
-```{r}
-ggplot(by_cat, aes(x = dev.category, y = `sum(weights_rounded)`)) +
-  geom_bar(stat = "identity")
-```
 
 
 ## US News Variables
@@ -70,20 +87,4 @@ ggplot(by_cat, aes(x = dev.category, y = `sum(weights_rounded)`)) +
 **Academic**
 - **Financial resources per student** (8%): represents a school's ability to have a strong environment for instruction and impact in academia, measured by comparing an institution's total expenditures on instruction, research, public service, academic support, student services and institutional support against its total academic year full-time equivalent student enrollment (only academic spending).
 
-## Todo
 
-- do a side by side bar graph that compares proportion of variables from each category in ours/original formula
-
-```{r include=F, echo=F}
-print(formula$Indicator, formula$schools_with_sat.act_2025)
-print(final_dictionary)
-```
-```{r}
-weights_by_cat <- dict %>%
-  group_by(category) %>%
-  summarize(sum(weights_rounded)) %>%
-  print()
-
-print(us_formula_weights)
-print(predictions)
-```
