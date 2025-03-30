@@ -10,6 +10,7 @@ library(corrr)
 library(FactoMineR)
 library(tidyverse)
 library(leaps)
+library(caret)
 ```
 
 ```{r}
@@ -18,6 +19,8 @@ testing <- read.csv("testing.csv")
 
 lasso_filtered <- lasso_filtered %>% 
   select(-X)
+
+lasso_filtered$LOCALE <- as.factor(lasso_filtered$LOCALE)
 ```
 
 ```{r}
@@ -158,6 +161,7 @@ print(predictions_forw_rounded)
 
 final_rank_forw <- rank(predictions_forw)
 ```
+
 ```{r}
 # build model for forward + best subsets
 
@@ -219,7 +223,6 @@ formula_step <- as.formula(paste("Ranking ~", paste(step_selected_vars, collapse
 
 # create model from stepwise selected variables
 final_model_step <- lm(formula_step, data = lasso_filtered)
-
 # check model performance
 summary(final_model_step)
 
@@ -319,22 +322,49 @@ length(intersect(combined_list, list_pca))
 ```
 
 ```{r}
+# standardized model
+
+dummy <- dummyVars(~ LOCALE, data = lasso_filtered, fullRank = FALSE)  
+encoded_df <- as.data.frame(predict(dummy, newdata = lasso_filtered))
+
+std_data <- cbind(lasso_filtered[, !names(lasso_filtered) %in% "LOCALE"], encoded_df)
+
+std_selected_vars <- step_selected_vars[-27]
+
+new_locale <- colnames(encoded_df)
+
+std_selected_vars <- c(std_selected_vars, new_locale)
+
+formula_step_std <- as.formula(paste("Ranking ~", paste(std_selected_vars, collapse = " + ")))
+
+std_data <- as.data.frame(scale(std_data))
+
+final_std_step <- lm(formula_step_std, data = std_data)
+
+summary(final_std_step)
+
+coefficients <- coef(final_std_step)[2:39]
+
+sum_coefs <- sum(abs(coefficients))
+
+normalized_coefs <- coefficients / sum_coefs
+```
+
+```{r}
 # create dictionary and append stepwise model coefficient to it
 full_dictionary <- readxl::read_excel("CollegeScorecardDataDictionary.xlsx", sheet = 4)
 
 dictionary <- full_dictionary %>%
-  select(c("NAME OF DATA ELEMENT", "VARIABLE NAME")) %>% na.omit("VARIABLE NAME") %>%
+  select(c("NAME OF DATA ELEMENT", "VARIABLE NAME", "dev-category")) %>% na.omit("VARIABLE NAME") %>%
   filter(`VARIABLE NAME` %in% step_selected_vars)
 
-coefficients <- as.data.frame(coef(final_model_step)) %>%
+# change final model step 
+coefficients <- as.data.frame(normalized_coefs) %>%
   tibble::rownames_to_column(var = "Variable") %>%
   rename(Coefficient = 2) 
-coefficients <- coefficients[-1,]
 
-coefficients_final <- coefficients %>%
-  mutate(abs_coef = abs(Coefficient)) %>%
-  mutate(weights = 100 * abs_coef / sum(abs_coef)) %>%
-  mutate(weights_rounded = round(weights, 2))
+coefficients_final <- coefficients %>%  
+  mutate(weights_rounded = round(abs(Coefficient), 2))
 
 final_dictionary <- full_join(dictionary, coefficients_final, by = c("VARIABLE NAME" = "Variable"))
 
