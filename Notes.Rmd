@@ -5,8 +5,11 @@ date: "2025-03-20"
 ---
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
+library(ggplot2)
+library(dplyr)
 dict <- read.csv("final_dictionary.csv")
 formula <- read.csv("us_news_formula.csv")
+us_formula_weights <- read.csv("us_news_weights.csv")
 predictions <- read.csv("final_predictions.csv")
 ```
 
@@ -18,75 +21,69 @@ predictions <- read.csv("final_predictions.csv")
 
 - The borrower debt variable is sourced from college scorecard (source: https://www.usnews.com/education/best-colleges/articles/ranking-criteria-and-weights)
 - US News explicitly said no admission rates, but our model had one variable for admission rate
-- US news factors that we know are included in our model:
-  - **Student-faculty ratio**: 
-  - **Graduation rates**: Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) , pooled in two-year rolling averages and suppressed for small n size, Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for white students, Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for black students  
-  - **Faculty salaries**: Average faculty salary 
-  - **Full-time faculty**: Proportion of faculty that is full-time
-  - **Financial resources per student**: Instructional expenditures per full-time equivalent student
+- weird variables: no pell withdraw, forbearance, 
+- there were some diversity-related stuff
+
+- US news factors that we know are included in our model (exact):
+  - **Faculty salaries**: 
+  - **Full-time faculty**: 
+  - **Financial resources per student**:
+  - **Pell graduation rate**:
   
 - Things that are not directly on the formula but kinda adjacent:
-  - **Borrower debt**: Three-year cohort default rate, Percentage of undergraduate federal student loan borrowers in deferment after 2 years, suppressed for n<30
+  - **Graduation rates**: 
   - **Retention rate**: 
   
-- Unclassified (because I am tired):
-Locale of institution  
-Bachelor's degree in Engineering Technologies And Engineering-Related Fields.  
-Bachelor's degree in Theology And Religious Vocations.  
-Bachelor's degree in Visual And Performing Arts.  
-Percent of students who never received a Pell Grant at the institution and who transferred to a 4-year institution and were still enrolled within 2 years  
-Percent of middle-income (between $30,000 and $75,000 in nominal family income) students who completed within 4 years at original institution  
-Percent of students who never received a Pell Grant at the institution and withdrew from original institution within 4 years  
-Percent of female students who transferred to a 4-year institution and completed within 6 years  
-One-year repayment rate for students who are not first-generation  
-Aided students with family incomes between $48,001-$75,000 in nominal dollars  
-The median debt for independent students  
-Number of students in the 7-year repayment rate of independent students cohort  
-Adjusted cohort count for Direct Subsidized Loan recipients who did not receive a Pell Grant completion rate at four-year institutions (denominator of 150% Direct Subsidized Loan recipient who did not receive a Pell Grant completion rate)  
-Percentage of part-time, not first-time students that did not receive an award and whose enrollment status is unknown after leaving this institution within 8 years of entry, pooled in rolling averages and suppressed for small n size  
-Percentage of undergraduate federal student loan borrowers in forbearance after 1 year  
-Undergraduate unknown completion status undergraduate federal student loan borrower-based 2-year borrower count  
-Cost of attendance: off-campus other expenses  
-Percentage of first-time Pell Grant recipient students receiving an award within 8 years of entry, pooled in rolling averages and suppressed for small n size  
-Share of full time faculty that are U.S. Nonresidents  
-Share of full time faculty that are of unknown race/ethnicity  
-Percentage of first-time non-Pell Grant recipient students receiving an award within 8 years of entry
-
+- New things
+  - location, what degrees they offer, cost of attendance, median debt for independent students, faculty diversity
+  
+```{r}
+ggplot(by_cat, aes(x = dev.category, y = `sum(weights_rounded)`)) +
+  geom_bar(stat = "identity")
+```
 
 
 ## US News Variables
 
-#### Retention and graduation rates
-- **Graduation rates**: percentage of entering full-time first-year bachelor's or equivalent degree-seeking students who completed a bachelor's or equivalent degree within a six-year period (averaged over four years)
-- **First-year retention rates**: average proportion of the first-year classes entering who returned to school the following fall                               
-- **Graduation rate performance**: four-year rolling average comparing each college's six-year graduation rates with what U.S. News predicted for their corresponding start year through entering classes. If the actual graduation rate is higher than the predicted rate, the college is enhancing achievement or is overperforming. If its actual graduation rate is lower than the predicted rate, it's underperforming.
+#### Comple
+- **Graduation rates** (16%): percentage of entering full-time first-year bachelor's or equivalent degree-seeking students who completed a bachelor's or equivalent degree within a six-year period (averaged over four years)
+- **First-year retention rates** (5%): average proportion of the first-year classes entering who returned to school the following fall
+- **Graduation rate performance** (10%): four-year rolling average comparing each college's six-year graduation rates with what U.S. News predicted for their corresponding start year through entering classes. If the actual graduation rate is higher than the predicted rate, the college is enhancing achievement or is overperforming. If its actual graduation rate is lower than the predicted rate, it's underperforming.
 
-#### First gen and Pell related
-- **Pell graduation rates**: six-year graduation rates of students who received Pell Grants                                    
-- **Pell graduation performance**: success at achieving equitable outcomes for students from underserved backgrounds. Initial score is calculated by comparing Pell graduation rates to non-Pell graduating rates (highest is 1), and schools whose entering cohorts were at least 50% Pell Grant students had their scores augmented by 0.5; schools below 50% Pell Grant students had their scores augmented by the proportion that received Pell Grants.                              
+#### Mobility
+- **Pell graduation rates** (5.5%): six-year graduation rates of students who received Pell Grants
+- **Pell graduation performance** (5.5%): success at achieving equitable outcomes for students from underserved backgrounds. Initial score is calculated by comparing Pell graduation rates to non-Pell graduating rates (highest is 1), and schools whose entering cohorts were at least 50% Pell Grant students had their scores augmented by 0.5; schools below 50% Pell Grant students had their scores augmented by the proportion that received Pell Grants.
+- **College grads earning more than a high school grad** (5%): proportion of a school's federal loan recipients who in five years since completing their undergraduate degrees were earning more than the median salary of a 25-34yo whose highest level of education is high school
 
-#### Graduate outcomes
-- **College grads earning more than a high school grad**: proportion of a school's federal loan recipients who in five years since completing their undergraduate degrees were earning more than the median salary of a 25-34yo whose highest level of education is high school      
-- **Borrower debt**: each school's typical average accumulated federal loan debt among only borrowers who graduated                                            
+#### Debt
+- **Borrower debt** (5%): each school's typical average accumulated federal loan debt among only borrowers who graduated
 
-#### Faculty related
-- **Faculty salaries** (+2%): averaged salaries from all full-time instructional tenured and nontenured faculty                                         
-- **Full-time faculty** (+1%): proportion of the fall instructional faculty that was full time                                        
-- **Student-faculty ratio** (+1%): ratio of full-time-equivalent students to full-time-equivalent faculty members during fall, excluding faculty that only teaches graduate level                                    
-
-## Citations (Note: national universities only)
-
-- Citations per publication                                
-- Field-Weighted Citation Impact                           
-- Publication share in the Top 5% of Journals by CiteScore 
-- Publication share in the Top 25% of Journals by CiteScore
+#### Faculty
+- **Faculty salaries** (6%)(+2%): averaged salaries from all full-time instructional tenured and nontenured faculty
+- **Full-time faculty** (2%)(+1%): proportion of the fall instructional faculty that was full time
+- **Student-faculty ratio** (3%)(+1%): ratio of full-time-equivalent students to full-time-equivalent faculty members during fall, excluding faculty that only teaches graduate level
 
 **Others**
-- **Standardized tests**: assessed schools on their fall 2023 SAT/ACT scores if they were reported on at least half of their new entrants, if less than half this category is cancelled and weights of graduation rates is increase by 5%
-- **Financial resources per student**: represents a school's ability to have a strong environment for instruction and impact in academia, measured by comparing an institution's total expenditures on instruction, research, public service, academic support, student services and institutional support against its total academic year full-time equivalent student enrollment (only academic spending).
-- **Peer assessment**
+- **Standardized tests**(5%): assessed schools on their fall 2023 SAT/ACT scores if they were reported on at least half of their new entrants, if less than half this category is cancelled and weights of graduation rates is increase by 5%
+- **Peer assessment** (20%)
+
+**Academic**
+- **Financial resources per student** (8%): represents a school's ability to have a strong environment for instruction and impact in academia, measured by comparing an institution's total expenditures on instruction, research, public service, academic support, student services and institutional support against its total academic year full-time equivalent student enrollment (only academic spending).
+
+## Todo
+
+- do a side by side bar graph that compares proportion of variables from each category in ours/original formula
 
 ```{r include=F, echo=F}
 print(formula$Indicator, formula$schools_with_sat.act_2025)
 print(final_dictionary)
+```
+```{r}
+weights_by_cat <- dict %>%
+  group_by(category) %>%
+  summarize(sum(weights_rounded)) %>%
+  print()
+
+print(us_formula_weights)
+print(predictions)
 ```
