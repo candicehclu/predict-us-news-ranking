@@ -370,7 +370,7 @@ final_dictionary <- full_join(dictionary, coefficients_final, by = c("VARIABLE N
 
 final_dictionary <- final_dictionary %>%
   mutate(impact = ifelse(Coefficient > 0, "neg", "pos")) %>%
-  select(c(`NAME OF DATA ELEMENT`, impact, weights_rounded, Coefficient, `VARIABLE NAME`))
+  select(c(`NAME OF DATA ELEMENT`, impact, weights_rounded, Coefficient, `VARIABLE NAME`, `dev-category`))
 
 # factors that improve ranking
 final_dictionary %>%
