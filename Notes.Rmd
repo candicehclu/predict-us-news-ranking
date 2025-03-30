@@ -34,9 +34,9 @@ us_formula_weight <- us_formula_weight %>%
 
 weights_compare <- rbind(us_formula_weight, weights_by_cat)
 
-ggplot(weights_compare, aes(fill = From, x = category, y = weights)) +
+ggplot(weights_compare, aes(fill = From, x = category, y = weights*100)) +
   geom_bar(stat = "identity", position = "dodge") +
-  labs(fill = "Formula")
+  labs(fill = "Formula", y = "Weights (%)", x = "Category")
 ```
 
 ## Notes
