@@ -21,29 +21,30 @@ lasso_filtered <- lasso_filtered %>%
   select(-X)
 
 lasso_filtered$LOCALE <- as.factor(lasso_filtered$LOCALE)
+testing$LOCALE <- as.factor(testing$LOCALE)
 ```
 
 ```{r}
-lasso_pca <- lasso_filtered[, -which(names(lasso_filtered) == "Ranking")]
-pca_result <- prcomp(lasso_pca, scale = TRUE)
-summary(pca_result)
-
-
-# top 5 contributing variables for the first 10 principal components
-top_vars_10 <- lapply(1:10, function(i) {
-  x <- pca_result$rotation[, i]
-  top_contributors <- sort(abs(x), decreasing = TRUE)[1:5]
-  var_names <- names(top_contributors)
-  data.frame(PC = paste0("PC", i), Variable = var_names, Loading = top_contributors)
-})
-
-
-top_vars_10_df <- do.call(rbind, top_vars_10)
-
-# Print the result
-print(top_vars_10_df)
-
-list_pca <- top_vars_10_df[, 2]
+# lasso_pca <- lasso_filtered[, -which(names(lasso_filtered) == "Ranking")]
+# pca_result <- prcomp(lasso_pca, scale = TRUE)
+# summary(pca_result)
+# 
+# 
+# # top 5 contributing variables for the first 10 principal components
+# top_vars_10 <- lapply(1:10, function(i) {
+#   x <- pca_result$rotation[, i]
+#   top_contributors <- sort(abs(x), decreasing = TRUE)[1:5]
+#   var_names <- names(top_contributors)
+#   data.frame(PC = paste0("PC", i), Variable = var_names, Loading = top_contributors)
+# })
+# 
+# 
+# top_vars_10_df <- do.call(rbind, top_vars_10)
+# 
+# # Print the result
+# print(top_vars_10_df)
+# 
+# list_pca <- top_vars_10_df[, 2]
 ```
 
 
@@ -109,11 +110,6 @@ print(predictions_back_rounded)
 
 final_rank_back <- rank(predictions_back)
 
-residual <- {}
-for (i in 1:50) {
-  residual[i] <-  abs(predictions_back_rounded[i] - testing_final$X2025[i])
-}
-sum(residual) / 100
 ```
 
 ```{r}
@@ -137,12 +133,12 @@ print(forw_selected_vars)
 formula_forw <- as.formula(paste("Ranking ~", paste(forw_selected_vars, collapse = " + ")))
 
 # run best subsets
-best_subsets_forw <- regsubsets(
-  formula_forw, 
-  data = lasso_filtered,
-  nvmax = 30,
-  really.big = TRUE
-)
+# best_subsets_forw <- regsubsets(
+#   formula_forw, 
+#   data = lasso_filtered,
+#   nvmax = 30,
+#   really.big = TRUE
+# )
 
 # best subsets gave a different model
 summary_best_forw <- summary(best_subsets_forw)
