@@ -1,40 +1,40 @@
-"","NAME OF DATA ELEMENT","impact","weights_rounded","Coefficient","VARIABLE NAME","dev-category"
-"1","Locale of institution",NA,NA,NA,"LOCALE","school"
-"2","Bachelor's degree in Engineering Technologies And Engineering-Related Fields.","pos",0.03,-0.0344456339163998,"CIP15BACHL","academics"
-"3","Bachelor's degree in Theology And Religious Vocations.","neg",0.04,0.0420998234120347,"CIP39BACHL","academics"
-"4","Bachelor's degree in Visual And Performing Arts.","neg",0.02,0.0198357821544022,"CIP50BACHL","academics"
-"5","Instructional expenditures per full-time equivalent student","pos",0.05,-0.0483055597006967,"INEXPFTE","school"
-"6","Average faculty salary","pos",0.06,-0.0566801394276263,"AVGFACSAL","school"
-"7","Proportion of faculty that is full-time","pos",0.02,-0.0217989157152116,"PFTFAC","school"
-"8","Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for white students","pos",0.04,-0.0405422787217428,"C150_4_WHITE","completion"
-"9","Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for black students","pos",0.03,-0.0272424997212232,"C150_4_BLACK","completion"
-"10","Three-year cohort default rate","neg",0.01,0.0106539366303325,"CDR3","repayment"
-"11","Percent of students who never received a Pell Grant at the institution and who transferred to a 4-year institution and were still enrolled within 2 years","neg",0.01,0.00861390009638737,"NOPELL_ENRL_4YR_TRANS_YR2_RT","completion"
-"12","Percent of middle-income (between $30,000 and $75,000 in nominal family income) students who completed within 4 years at original institution","pos",0.05,-0.0461753611131319,"MD_INC_COMP_ORIG_YR4_RT","completion"
-"13","Percent of students who never received a Pell Grant at the institution and withdrew from original institution within 4 years","pos",0.01,-0.0147230068520408,"NOPELL_WDRAW_ORIG_YR4_RT","completion"
-"14","Percent of female students who transferred to a 4-year institution and completed within 6 years","neg",0.01,0.013487907478427,"FEMALE_COMP_4YR_TRANS_YR6_RT","completion"
-"15","One-year repayment rate for students who are not first-generation","neg",0.06,0.0617930481783266,"NOTFIRSTGEN_RPY_1YR_RT","repayment"
-"16","Aided students with family incomes between $48,001-$75,000 in nominal dollars","pos",0.03,-0.0300127584662484,"INC_PCT_M2","student"
-"17","The median debt for independent students","neg",0.03,0.0342480938214499,"IND_DEBT_MDN","aid"
-"18","Number of students in the 7-year repayment rate of independent students cohort","pos",0.01,-0.0101884686039421,"IND_RPY_7YR_N","repayment"
-"19","Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) , pooled in two-year rolling averages and suppressed for small n size.","pos",0.08,-0.0846743541038525,"C150_4_POOLED_SUPP","completion"
-"20","Adjusted cohort count for Direct Subsidized Loan recipients who did not receive a Pell Grant completion rate at four-year institutions (denominator of 150% Direct Subsidized Loan recipient who did not receive a Pell Grant completion rate)","neg",0.02,0.0178349436042968,"D150_4_LOANNOPELL","completion"
-"21","Percentage of part-time, not first-time students that did not receive an award and whose enrollment status is unknown after leaving this institution within 8 years of entry, pooled in rolling averages and suppressed for small n size","pos",0.02,-0.0160811516342457,"OMENRUP8_PTNFT_POOLED_SUPP","completion"
-"22","Percentage of undergraduate federal student loan borrowers in forbearance after 1 year","pos",0.01,-0.0139476316034665,"BBRR1_FED_UG_FBR","repayment"
-"23","Undergraduate unknown completion status undergraduate federal student loan borrower-based 2-year borrower count","neg",0.03,0.0340120005609741,"BBRR2_FED_UGUNK_N","repayment"
-"24","Percentage of undergraduate federal student loan borrowers in deferment after 2 years, suppressed for n<30","pos",0.03,-0.0340943858247986,"BBRR2_FED_UG_DFR_SUPP","repayment"
-"25","Cost of attendance: off-campus other expenses","neg",0.02,0.024179534466051,"OTHEREXPENSE_OFF","cost"
-"26","Percentage of first-time Pell Grant recipient students receiving an award within 8 years of entry, pooled in rolling averages and suppressed for small n size","pos",0.07,-0.0661262774925129,"OMAWDP8_PELL_FTT_POOLED","completion"
-"27","Share of full time faculty that are U.S. Nonresidents","neg",0,0.00107051772295382,"IRPS_NRA","student"
-"28","Share of full time faculty that are of unknown race/ethnicity","neg",0.01,0.0117742717402848,"IRPS_UNKN","student"
-"29","Percentage of first-time non-Pell Grant recipient students receiving an award within 8 years of entry","pos",0.06,-0.0557597565148162,"OMAWDP8_NOPELL_FIRSTTIME","completion"
-"30",NA,"pos",0,-0.000227594889501652,"LOCALE.11",NA
-"31",NA,"neg",0,0.000270285314463516,"LOCALE.12",NA
-"32",NA,"neg",0.01,0.00757651271199633,"LOCALE.13",NA
-"33",NA,"pos",0,-0.000144705764653558,"LOCALE.21",NA
-"34",NA,"pos",0.01,-0.0133364196955794,"LOCALE.22",NA
-"35",NA,"pos",0.02,-0.0162695527479281,"LOCALE.23",NA
-"36",NA,"pos",0.01,-0.0145222945439684,"LOCALE.31",NA
-"37",NA,"pos",0.03,-0.0279952485910016,"LOCALE.32",NA
-"38",NA,"pos",0.02,-0.0194964627781545,"LOCALE.33",NA
-"39",NA,"pos",0.02,-0.0197589836848765,"LOCALE.41",NA
+,NAME OF DATA ELEMENT,impact,weights_rounded,Coefficient,VARIABLE NAME,dev-category,category
+1,Locale of institution,NA,NA,NA,LOCALE,school,other
+2,Bachelor's degree in Engineering Technologies And Engineering-Related Fields.,pos,0.03,-0.034445634,CIP15BACHL,academics,academic
+3,Bachelor's degree in Theology And Religious Vocations.,neg,0.04,0.042099823,CIP39BACHL,academics,academic
+4,Bachelor's degree in Visual And Performing Arts.,neg,0.02,0.019835782,CIP50BACHL,academics,academic
+5,Instructional expenditures per full-time equivalent student,pos,0.05,-0.04830556,INEXPFTE,school,academic
+6,Average faculty salary,pos,0.06,-0.056680139,AVGFACSAL,school,faculty
+7,Proportion of faculty that is full-time,pos,0.02,-0.021798916,PFTFAC,school,faculty
+8,"Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for white students",pos,0.04,-0.040542279,C150_4_WHITE,completion,completion
+9,"Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) for black students",pos,0.03,-0.0272425,C150_4_BLACK,completion,completion
+10,Three-year cohort default rate,neg,0.01,0.010653937,CDR3,repayment,debt
+11,Percent of students who never received a Pell Grant at the institution and who transferred to a 4-year institution and were still enrolled within 2 years,neg,0.01,0.0086139,NOPELL_ENRL_4YR_TRANS_YR2_RT,completion,completion
+12,"Percent of middle-income (between $30,000 and $75,000 in nominal family income) students who completed within 4 years at original institution",pos,0.05,-0.046175361,MD_INC_COMP_ORIG_YR4_RT,completion,completion
+13,Percent of students who never received a Pell Grant at the institution and withdrew from original institution within 4 years,pos,0.01,-0.014723007,NOPELL_WDRAW_ORIG_YR4_RT,completion,completion
+14,Percent of female students who transferred to a 4-year institution and completed within 6 years,neg,0.01,0.013487907,FEMALE_COMP_4YR_TRANS_YR6_RT,completion,completion
+15,One-year repayment rate for students who are not first-generation,neg,0.06,0.061793048,NOTFIRSTGEN_RPY_1YR_RT,repayment,debt
+16,"Aided students with family incomes between $48,001-$75,000 in nominal dollars",pos,0.03,-0.030012758,INC_PCT_M2,student,affordability
+17,The median debt for independent students,neg,0.03,0.034248094,IND_DEBT_MDN,aid,affordability
+18,Number of students in the 7-year repayment rate of independent students cohort,pos,0.01,-0.010188469,IND_RPY_7YR_N,repayment,debt
+19,"Completion rate for first-time, full-time students at four-year institutions (150% of expected time to completion) , pooled in two-year rolling averages and suppressed for small n size.",pos,0.08,-0.084674354,C150_4_POOLED_SUPP,completion,completion
+20,Adjusted cohort count for Direct Subsidized Loan recipients who did not receive a Pell Grant completion rate at four-year institutions (denominator of 150% Direct Subsidized Loan recipient who did not receive a Pell Grant completion rate),neg,0.02,0.017834944,D150_4_LOANNOPELL,completion,completion
+21,"Percentage of part-time, not first-time students that did not receive an award and whose enrollment status is unknown after leaving this institution within 8 years of entry, pooled in rolling averages and suppressed for small n size",pos,0.02,-0.016081152,OMENRUP8_PTNFT_POOLED_SUPP,completion,completion
+22,Percentage of undergraduate federal student loan borrowers in forbearance after 1 year,pos,0.01,-0.013947632,BBRR1_FED_UG_FBR,repayment,debt
+23,Undergraduate unknown completion status undergraduate federal student loan borrower-based 2-year borrower count,neg,0.03,0.034012001,BBRR2_FED_UGUNK_N,repayment,debt
+24,"Percentage of undergraduate federal student loan borrowers in deferment after 2 years, suppressed for n<30",pos,0.03,-0.034094386,BBRR2_FED_UG_DFR_SUPP,repayment,debt
+25,Cost of attendance: off-campus other expenses,neg,0.02,0.024179534,OTHEREXPENSE_OFF,cost,affordability
+26,"Percentage of first-time Pell Grant recipient students receiving an award within 8 years of entry, pooled in rolling averages and suppressed for small n size",pos,0.07,-0.066126277,OMAWDP8_PELL_FTT_POOLED,completion,mobility
+27,Share of full time faculty that are U.S. Nonresidents,neg,0,0.001070518,IRPS_NRA,student,faculty
+28,Share of full time faculty that are of unknown race/ethnicity,neg,0.01,0.011774272,IRPS_UNKN,student,faculty
+29,Percentage of first-time non-Pell Grant recipient students receiving an award within 8 years of entry,pos,0.06,-0.055759757,OMAWDP8_NOPELL_FIRSTTIME,completion,completion
+30,NA,pos,0,-0.000227595,LOCALE.11,NA,
+31,NA,neg,0,0.000270285,LOCALE.12,NA,
+32,NA,neg,0.01,0.007576513,LOCALE.13,NA,
+33,NA,pos,0,-0.000144706,LOCALE.21,NA,
+34,NA,pos,0.01,-0.01333642,LOCALE.22,NA,
+35,NA,pos,0.02,-0.016269553,LOCALE.23,NA,
+36,NA,pos,0.01,-0.014522295,LOCALE.31,NA,
+37,NA,pos,0.03,-0.027995249,LOCALE.32,NA,
+38,NA,pos,0.02,-0.019496463,LOCALE.33,NA,
+39,NA,pos,0.02,-0.019758984,LOCALE.41,NA,
