@@ -7,6 +7,7 @@ date: "2025-03-20"
 knitr::opts_chunk$set(echo = TRUE)
 library(ggplot2)
 library(dplyr)
+library(RColorBrewer)
 dict <- read.csv("final_dictionary.csv")
 formula <- read.csv("us_news_formula.csv")
 us_formula_weights <- read.csv("us_news_weights.csv")
@@ -23,20 +24,21 @@ weights_by_cat <- dict %>%
 weights_by_cat$weights[8] <- 0.12
 weights_by_cat <- weights_by_cat[-1,]
 weights_by_cat <- weights_by_cat %>%
-  mutate(From = "ours")
+  mutate(From = "Best Model")
 
 us_formula_weight <- us_formula_weights[-7,]
 us_formula_weight <- rbind(us_formula_weight, data.frame(category = "affordability", weight = 0))
 us_formula_weight <- us_formula_weight %>%
   mutate(weights = weight) %>%
   select(c("weights", "category")) %>%
-  mutate(From = "original")
+  mutate(From = "U.S. News")
 
 weights_compare <- rbind(us_formula_weight, weights_by_cat)
 
 ggplot(weights_compare, aes(fill = From, x = category, y = weights*100)) +
   geom_bar(stat = "identity", position = "dodge") +
-  labs(fill = "Formula", y = "Weights (%)", x = "Category")
+  labs(fill = "Formula", y = "Weights (%)", x = "Category") +
+  scale_fill_brewer(palette = "Paired")
 ```
 
 ## Notes
